@@ -1,7 +1,7 @@
 From c25da8d5fa5cbfc2c0c51530d3065434f41a3925 Mon Sep 17 00:00:00 2001
 From: Peter Jones <pjones@redhat.com>
 Date: Mon, 1 Jun 2015 11:35:54 -0400
-Subject: [PATCH] Always use upper case for Boot#### names.
+Subject: [PATCH 1/4] Always use upper case for Boot#### names.
 
 UEFI requires upper case names...
 

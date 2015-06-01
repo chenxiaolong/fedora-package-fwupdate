@@ -3,7 +3,7 @@
 
 Name:           fwupdate
 Version:        0.3
-Release:        2%{?dist}
+Release:        4%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
 URL:            https://github.com/rhinstaller/fwupdate
@@ -29,6 +29,9 @@ ExclusiveArch:  x86_64 %{ix86} aarch64
 
 Source0:        https://github.com/rhinstaller/fwupdate/releases/download/%{name}-%{version}/%{name}-%{version}.tar.bz2
 Patch0001: 0001-Always-use-upper-case-for-Boot-names.patch
+Patch0002: 0002-Create-abbreviated-device-paths-for-our-BootNext-ent.patch
+Patch0003: 0003-Make-subdir-Makefiles-get-the-version-right.patch
+Patch0004: 0004-Fix-ucs2len-to-handle-max-1-correctly.patch
 
 %description
 fwupdate provides a simple command line interface to the UEFI firmware updates.
@@ -95,6 +98,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.so.*
 
 %changelog
+* Mon Jun 01 2015 Peter Jones <pjones@redhat.com> - 0.3-4
+- Make abbreviated device paths work in the BootNext entry.
+- Fix a ucs2 parsing bug.
+
+* Mon Jun 01 2015 Peter Jones <pjones@redhat.com> - 0.3-3
+- Always use abbreviated device paths for Boot#### entries.
+
 * Mon Jun 01 2015 Peter Jones <pjones@redhat.com> - 0.3-2
 - Fix boot entry naming.
 

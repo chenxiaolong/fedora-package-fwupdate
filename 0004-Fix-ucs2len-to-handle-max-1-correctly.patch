@@ -1,0 +1,26 @@
+From 79b416af540c67d4f0f742abac102c05f5f49c39 Mon Sep 17 00:00:00 2001
+From: Peter Jones <pjones@redhat.com>
+Date: Mon, 1 Jun 2015 14:35:02 -0400
+Subject: [PATCH 4/4] Fix ucs2len() to handle max=-1 correctly.
+
+Signed-off-by: Peter Jones <pjones@redhat.com>
+---
+ linux/ucs2.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/linux/ucs2.h b/linux/ucs2.h
+index 67d22e1..082032b 100644
+--- a/linux/ucs2.h
++++ b/linux/ucs2.h
+@@ -102,7 +102,7 @@ __attribute__((__unused__))
+ ucs2len(uint16_t *s, ssize_t limit)
+ {
+ 	ssize_t i;
+-	for (i = 0; i < limit && s[i] != L'\0'; i++)
++	for (i = 0; i < (limit > 0 ? limit : i + 1) && s[i] != L'\0'; i++)
+ 		;
+ 	return i;
+ }
+-- 
+2.4.2
+

@@ -1,0 +1,37 @@
+From 2f515df557a8dbe2d6a0a628279e200c1e255f7f Mon Sep 17 00:00:00 2001
+From: Peter Jones <pjones@redhat.com>
+Date: Mon, 1 Jun 2015 12:01:11 -0400
+Subject: [PATCH 2/4] Create abbreviated device paths for our BootNext entry.
+
+Signed-off-by: Peter Jones <pjones@redhat.com>
+---
+ linux/libfwup.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/linux/libfwup.c b/linux/libfwup.c
+index 4a8bd2a..59cc865 100644
+--- a/linux/libfwup.c
++++ b/linux/libfwup.c
+@@ -546,7 +546,8 @@ set_up_boot_next(void)
+ 							    ? fwup_fs_path
+ 							    : shim_fs_path,
+ 					   EFIBOOT_OPTIONS_IGNORE_FS_ERROR|
+-					   EFIBOOT_OPTIONS_IGNORE_PMBR_ERR);
++					   EFIBOOT_OPTIONS_IGNORE_PMBR_ERR|
++					   EFIBOOT_ABBREV_HD);
+ 	if (sz < 0)
+ 		return -1;
+ 
+@@ -567,7 +568,8 @@ set_up_boot_next(void)
+ 							    ? fwup_fs_path
+ 							    : shim_fs_path,
+ 					   EFIBOOT_OPTIONS_IGNORE_FS_ERROR|
+-					   EFIBOOT_OPTIONS_IGNORE_PMBR_ERR);
++					   EFIBOOT_OPTIONS_IGNORE_PMBR_ERR|
++					   EFIBOOT_ABBREV_HD);
+ 	if (sz != dp_size)
+ 		return -1;
+ 
+-- 
+2.4.2
+
