@@ -1,0 +1,28 @@
+From c25da8d5fa5cbfc2c0c51530d3065434f41a3925 Mon Sep 17 00:00:00 2001
+From: Peter Jones <pjones@redhat.com>
+Date: Mon, 1 Jun 2015 11:35:54 -0400
+Subject: [PATCH] Always use upper case for Boot#### names.
+
+UEFI requires upper case names...
+
+Signed-off-by: Peter Jones <pjones@redhat.com>
+---
+ linux/libfwup.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/linux/libfwup.c b/linux/libfwup.c
+index d0cac8d..4a8bd2a 100644
+--- a/linux/libfwup.c
++++ b/linux/libfwup.c
+@@ -687,7 +687,7 @@ do_next:
+ 		if (boot_next >= 0x10000)
+ 			goto out;
+ 
+-		sprintf(boot_next_name, "Boot%04x", boot_next);
++		sprintf(boot_next_name, "Boot%04X", boot_next);
+ 		rc = efi_set_variable(*guid, boot_next_name, opt, opt_size,
+ 				      EFI_VARIABLE_NON_VOLATILE |
+ 				      EFI_VARIABLE_BOOTSERVICE_ACCESS |
+-- 
+2.4.2
+
