@@ -2,8 +2,8 @@
 %global efibootmgr_version 0.12-1
 
 Name:           fwupdate
-Version:        0.3
-Release:        4%{?dist}
+Version:        0.4
+Release:        1%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
 URL:            https://github.com/rhinstaller/fwupdate
@@ -28,10 +28,6 @@ ExclusiveArch:  x86_64 %{ix86} aarch64
 %global efidir %(eval grep ^ID= /etc/os-release | sed -e 's/^ID=//' -e 's/rhel/redhat/')
 
 Source0:        https://github.com/rhinstaller/fwupdate/releases/download/%{name}-%{version}/%{name}-%{version}.tar.bz2
-Patch0001: 0001-Always-use-upper-case-for-Boot-names.patch
-Patch0002: 0002-Create-abbreviated-device-paths-for-our-BootNext-ent.patch
-Patch0003: 0003-Make-subdir-Makefiles-get-the-version-right.patch
-Patch0004: 0004-Fix-ucs2len-to-handle-max-1-correctly.patch
 
 %description
 fwupdate provides a simple command line interface to the UEFI firmware updates.
@@ -98,6 +94,20 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.so.*
 
 %changelog
+* Tue Jun 02 2015 Peter Jones <pjones@redhat.com> - 0.4-1
+- Update to 0.4
+- Set DESTDIR so it's more consistently respected
+- Always use upper case for Boot#### names.
+- Create abbreviated device paths for our BootNext entry.
+- Make subdir Makefiles get the version right.
+- Fix ucs2len() to handle max=-1 correctly.
+- Compare the right blobs when we're searching old boot entries.
+- Fix .efi generation on non-x86 platforms.
+- Use a relative path for fwupdate.efi when launched from shim.
+- Show fewer debugging messages.
+- Set BootNext when we find an old Boot#### variable as well.
+- Add fwup_get_fw_type().
+
 * Mon Jun 01 2015 Peter Jones <pjones@redhat.com> - 0.3-4
 - Make abbreviated device paths work in the BootNext entry.
 - Fix a ucs2 parsing bug.
