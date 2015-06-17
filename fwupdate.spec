@@ -3,7 +3,7 @@
 
 Name:           fwupdate
 Version:        0.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
 URL:            https://github.com/rhinstaller/fwupdate
@@ -96,6 +96,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.so.*
 
 %changelog
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Tue Jun 02 2015 Peter Jones <pjones@redhat.com> - 0.4-1
 - Update to 0.4
 - Set DESTDIR so it's more consistently respected
