@@ -3,7 +3,7 @@
 
 Name:           fwupdate
 Version:        0.5
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
 URL:            https://github.com/rhinstaller/fwupdate
@@ -34,7 +34,9 @@ fwupdate provides a simple command line interface to the UEFI firmware updates.
 
 %package libs
 Summary: Library to manage UEFI firmware updates
+%ifnarch %{ix86}
 Requires: shim
+%endif
 Requires: %{name}-efi = %{version}-%{release}
 
 %description libs
@@ -124,6 +126,10 @@ rm -rf $RPM_BUILD_ROOT
 /boot/efi/EFI/%{efidir}/fwup%{efiarch}.efi
 
 %changelog
+* Wed Nov 18 2015 Peter Jones <pjones@redhat.com> - 0.5-3
+- Temporarily don't require shim on i?86 - we've never built it there, and
+  libfwup knows how to handle it not being there just fine.
+
 * Wed Nov 18 2015 Peter Jones <pjones@redhat.com> - 0.5-2
 - Fix missing -libs Requires: due to editing error
 
