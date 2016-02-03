@@ -3,7 +3,7 @@
 
 Name:           fwupdate
 Version:        0.5
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
 URL:            https://github.com/rhinstaller/fwupdate
@@ -126,6 +126,9 @@ rm -rf $RPM_BUILD_ROOT
 /boot/efi/EFI/%{efidir}/fwup%{efiarch}.efi
 
 %changelog
+* Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.5-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
 * Wed Nov 18 2015 Peter Jones <pjones@redhat.com> - 0.5-3
 - Temporarily don't require shim on i?86 - we've never built it there, and
   libfwup knows how to handle it not being there just fine.
