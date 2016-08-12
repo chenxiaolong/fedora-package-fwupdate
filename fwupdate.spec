@@ -3,7 +3,7 @@
 
 Name:           fwupdate
 Version:        0.5
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
 URL:            https://github.com/rhinstaller/fwupdate
@@ -15,6 +15,11 @@ BuildRequires:  elfutils popt-devel git gettext pkgconfig
 BuildRequires:  systemd
 ExclusiveArch:  x86_64 %{ix86} aarch64
 Source0:        https://github.com/rhinstaller/fwupdate/releases/download/%{name}-%{version}/%{name}-%{version}.tar.bz2
+# These are two patches plucked from the series between 0.5 and master
+# that make build against efivar 26 succeed. A build with the full
+# patch series fails due to https://github.com/rhinstaller/fwupdate/issues/54
+Patch0019:      0019-libfwup-better-bounds-checking-with-efivar-0.24-APIs.patch
+Patch0028:      0028-Always-set-a-mode-with-efi_set_variable.patch
 
 %ifarch x86_64
 %global efiarch x64
@@ -126,6 +131,9 @@ rm -rf $RPM_BUILD_ROOT
 /boot/efi/EFI/%{efidir}/fwup%{efiarch}.efi
 
 %changelog
+* Fri Aug 12 2016 Adam Williamson <awilliam@redhat.com> - 0.5-5
+- backport a couple of commits to fix build against efivar 26
+
 * Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.5-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 
