@@ -1,9 +1,9 @@
-%global efivar_version 0.21-1
-%global efibootmgr_version 0.12-1
+%global efivar_version 26-1
+%global efibootmgr_version 13-0.1
 
 Name:           fwupdate
-Version:        0.5
-Release:        5%{?dist}
+Version:        6
+Release:        1%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
 URL:            https://github.com/rhinstaller/fwupdate
@@ -15,11 +15,6 @@ BuildRequires:  elfutils popt-devel git gettext pkgconfig
 BuildRequires:  systemd
 ExclusiveArch:  x86_64 %{ix86} aarch64
 Source0:        https://github.com/rhinstaller/fwupdate/releases/download/%{name}-%{version}/%{name}-%{version}.tar.bz2
-# These are two patches plucked from the series between 0.5 and master
-# that make build against efivar 26 succeed. A build with the full
-# patch series fails due to https://github.com/rhinstaller/fwupdate/issues/54
-Patch0019:      0019-libfwup-better-bounds-checking-with-efivar-0.24-APIs.patch
-Patch0028:      0028-Always-set-a-mode-with-efi_set_variable.patch
 
 %ifarch x86_64
 %global efiarch x64
@@ -76,6 +71,8 @@ git config --unset user.name
 %build
 make OPT_FLAGS="$RPM_OPT_FLAGS" libdir=%{_libdir} bindir=%{_bindir} \
      EFIDIR=%{efidir} %{?_smp_mflags}
+mv -v efi/fwup%{efiarch}.efi efi/fwup%{efiarch}.unsigned.efi
+%pesign -s -i efi/fwup%{efiarch}.unsigned.efi -o efi/fwup%{efiarch}.efi
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -131,6 +128,14 @@ rm -rf $RPM_BUILD_ROOT
 /boot/efi/EFI/%{efidir}/fwup%{efiarch}.efi
 
 %changelog
+* Tue Aug 16 2016 Peter Jones <pjones@redhat.com> - 6-1
+- Update to fwupdate 6
+- lots of build fixes for newer compilers and such
+- Use libsmbios on some systems to enable firmware updates (Mario Limonciello)
+- Use the correct reset type from the QueryCapsuleInfo data
+- Lots of fixes from auditing
+- Use efivar's error reporting infrastructure
+
 * Fri Aug 12 2016 Adam Williamson <awilliam@redhat.com> - 0.5-5
 - backport a couple of commits to fix build against efivar 26
 
