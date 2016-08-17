@@ -1,5 +1,5 @@
 %global efivar_version 28-1
-%global efibootmgr_version 13-0.1
+%global efibootmgr_version 13-1
 
 Name:           fwupdate
 Version:        7
@@ -12,7 +12,7 @@ BuildRequires:  efivar-devel >= %{efivar_version}
 BuildRequires:  gnu-efi gnu-efi-devel
 BuildRequires:  pesign
 BuildRequires:  elfutils popt-devel git gettext pkgconfig
-BuildRequires:  systemd
+BuildRequires:  systemd libsmbios-devel
 ExclusiveArch:  x86_64 %{ix86} aarch64
 Source0:        https://github.com/rhinstaller/fwupdate/releases/download/%{name}-%{version}/%{name}-%{version}.tar.bz2
 Patch0001:	0001-fwupdate-fakeesrt-fix-some-typecasting-errors-on-i68.patch
