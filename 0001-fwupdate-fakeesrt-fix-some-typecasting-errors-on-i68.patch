@@ -1,0 +1,110 @@
+From 5780fcb22e5d647cf14d54e1e70b40af53380447 Mon Sep 17 00:00:00 2001
+From: Peter Jones <pjones@redhat.com>
+Date: Wed, 17 Aug 2016 13:05:27 -0400
+Subject: [PATCH] fwupdate+fakeesrt: fix some typecasting errors on i686
+
+Signed-off-by: Peter Jones <pjones@redhat.com>
+---
+ efi/fakeesrt.c | 23 +++++++++++++++++------
+ efi/fwupdate.c | 22 ++++++++++++++++++----
+ 2 files changed, 35 insertions(+), 10 deletions(-)
+
+diff --git a/efi/fakeesrt.c b/efi/fakeesrt.c
+index 09824ba..4f51742 100644
+--- a/efi/fakeesrt.c
++++ b/efi/fakeesrt.c
+@@ -37,24 +37,35 @@ efi_main (EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab)
+ 	};
+ 	EFI_STATUS status;
+ 	EFI_PHYSICAL_ADDRESS mem = 0;
++	EFI_ALLOCATE_TYPE type = AllocateAnyPages;
+ 
+ 	InitializeLib(image_handle, systab);
+ 
+-	status = systab->BootServices->AllocatePages(AllocateAnyPages,
+-						EfiRuntimeServicesData,
+-						1, &mem);
++	if (sizeof (VOID *) == 4) {
++		mem = 0xffffffffULL - 8192;
++		type = AllocateMaxAddress;
++	}
++	status = uefi_call_wrapper(systab->BootServices->AllocatePages, 4,
++				   type, EfiRuntimeServicesData, 1, &mem);
+ 	if (EFI_ERROR(status)) {
+ 		Print(L"AllocatePages failed: %r\n", status);
+ 		return status;
+ 	}
+-	VOID *ptr = (VOID *)mem;
++	if (sizeof (VOID *) == 4 && mem > 0xffffffffULL) {
++		Print(L"Got bad allocation at 0x%016x\n", (UINT64)mem);
++		return EFI_OUT_OF_RESOURCES;
++	}
++	VOID *ptr = (VOID *)(UINTN)mem;
+ 
+ 	CopyMem(ptr, &esrt, sizeof (esrt));
+ 
+-	status = systab->BootServices->InstallConfigurationTable(&EsrtGuid,
+-								ptr);
++	status = uefi_call_wrapper(
++				systab->BootServices->InstallConfigurationTable,
++				2, &EsrtGuid, ptr);
+ 	if (EFI_ERROR(status)) {
+ 		Print(L"InstallConfigurationTable failed: %r\n", status);
++		uefi_call_wrapper(systab->BootServices->FreePages, 2,
++				  mem, 1);
+ 		return status;
+ 	}
+ 
+diff --git a/efi/fwupdate.c b/efi/fwupdate.c
+index 152a29a..b82e24e 100644
+--- a/efi/fwupdate.c
++++ b/efi/fwupdate.c
+@@ -67,11 +67,24 @@ allocate(void **addr, UINTN size)
+ 	UINTN pages = size / 4096 + ((size % 4096) ? 1 : 0);
+ 	EFI_STATUS rc;
+ 	EFI_PHYSICAL_ADDRESS pageaddr = 0;
++	EFI_ALLOCATE_TYPE type = AllocateAnyPages;
+ 
+-	rc = uefi_call_wrapper(BS->AllocatePages, 4, AllocateAnyPages,
++	if (sizeof (VOID *) == 4) {
++		pageaddr = 0xffffffffULL - 8192;
++		type = AllocateMaxAddress;
++	}
++
++	rc = uefi_call_wrapper(BS->AllocatePages, 4, type,
+ 			       EfiLoaderData, pages,
+ 			       &pageaddr);
+-	*addr = (void *)pageaddr;
++	if (EFI_ERROR(rc))
++		return rc;
++	if (sizeof (VOID *) == 4 && pageaddr > 0xffffffffULL) {
++		uefi_call_wrapper(BS->FreePages, 2, pageaddr, pages);
++		Print(L"Got bad allocation at 0x%016x\n", (UINT64)pageaddr);
++		return EFI_OUT_OF_RESOURCES;
++	}
++	*addr = (void *)(UINTN)pageaddr;
+ 	return rc;
+ }
+ 
+@@ -84,7 +97,8 @@ free(void *addr, UINTN size)
+ 	UINTN pages = size / 4096 + ((size % 4096) ? 1 : 0);
+ 	EFI_STATUS rc;
+ 
+-	rc = uefi_call_wrapper(BS->FreePages, 2, (EFI_PHYSICAL_ADDRESS)addr,
++	rc = uefi_call_wrapper(BS->FreePages, 2,
++			       (EFI_PHYSICAL_ADDRESS)(UINTN)addr,
+ 			       pages);
+ 	return rc;
+ }
+@@ -752,7 +766,7 @@ apply_capsules(EFI_CAPSULE_HEADER **capsules,
+ 
+ 	uefi_call_wrapper(BS->Stall, 1, 1 * SECONDS);
+ 	rc = uefi_call_wrapper(RT->UpdateCapsule, 3, capsules, num_updates,
+-			       (EFI_PHYSICAL_ADDRESS)(VOID *)cbd);
++			       (EFI_PHYSICAL_ADDRESS)(UINTN)cbd);
+ 	if (EFI_ERROR(rc)) {
+ 		Print(L"%a:%a():%d: Could not apply capsule update: %r\n",
+ 			      __FILE__, __func__, __LINE__, rc);
+-- 
+2.7.4
+

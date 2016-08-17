@@ -15,6 +15,7 @@ BuildRequires:  elfutils popt-devel git gettext pkgconfig
 BuildRequires:  systemd
 ExclusiveArch:  x86_64 %{ix86} aarch64
 Source0:        https://github.com/rhinstaller/fwupdate/releases/download/%{name}-%{version}/%{name}-%{version}.tar.bz2
+Patch0001:	0001-fwupdate-fakeesrt-fix-some-typecasting-errors-on-i68.patch
 
 %ifarch x86_64
 %global efiarch x64
