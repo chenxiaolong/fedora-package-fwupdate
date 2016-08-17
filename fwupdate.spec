@@ -1,8 +1,8 @@
-%global efivar_version 26-1
+%global efivar_version 28-1
 %global efibootmgr_version 13-0.1
 
 Name:           fwupdate
-Version:        6
+Version:        7
 Release:        1%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
@@ -128,6 +128,11 @@ rm -rf $RPM_BUILD_ROOT
 /boot/efi/EFI/%{efidir}/fwup%{efiarch}.efi
 
 %changelog
+* Wed Aug 17 2016 Peter Jones <pjones@redhat.com> - 7-1
+- Update to fwupdate 7
+- Fix the fix for ae7b85
+- fix one place where a second "rc" varibale is clobbering a result.
+
 * Tue Aug 16 2016 Peter Jones <pjones@redhat.com> - 6-1
 - Update to fwupdate 6
 - lots of build fixes for newer compilers and such
