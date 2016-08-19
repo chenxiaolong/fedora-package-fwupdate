@@ -2,7 +2,7 @@
 %global efibootmgr_version 13-1
 
 Name:           fwupdate
-Version:        7
+Version:        8
 Release:        1%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
@@ -12,10 +12,12 @@ BuildRequires:  efivar-devel >= %{efivar_version}
 BuildRequires:  gnu-efi gnu-efi-devel
 BuildRequires:  pesign
 BuildRequires:  elfutils popt-devel git gettext pkgconfig
-BuildRequires:  systemd libsmbios-devel
+BuildRequires:  systemd
+%ifarch x86_64 %{ix86}
+BuildRequires: libsmbios-devel
+%endif
 ExclusiveArch:  x86_64 %{ix86} aarch64
 Source0:        https://github.com/rhinstaller/fwupdate/releases/download/%{name}-%{version}/%{name}-%{version}.tar.bz2
-Patch0001:	0001-fwupdate-fakeesrt-fix-some-typecasting-errors-on-i68.patch
 
 %ifarch x86_64
 %global efiarch x64
@@ -129,6 +131,14 @@ rm -rf $RPM_BUILD_ROOT
 /boot/efi/EFI/%{efidir}/fwup%{efiarch}.efi
 
 %changelog
+* Fri Aug 19 2016 Peter Jones <pjones@redhat.com> - 8-1
+- Update to fwupdate 8
+- Fix some i686 build errors
+- Be less stupid about SONAMEs so in the future we'll only have to rebuild
+  dependent things on actual ABI changes.
+- Only depend on libsmbios on x86, for now, because it hasn't been ported to
+  Aarch64.
+
 * Wed Aug 17 2016 Peter Jones <pjones@redhat.com> - 7-1
 - Update to fwupdate 7
 - Fix the fix for ae7b85
