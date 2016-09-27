@@ -1,9 +1,9 @@
-%global efivar_version 28-1
+%global efivar_version 30-1
 %global efibootmgr_version 13-1
 
 Name:           fwupdate
 Version:        8
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
 URL:            https://github.com/rhinstaller/fwupdate
@@ -131,6 +131,9 @@ rm -rf $RPM_BUILD_ROOT
 /boot/efi/EFI/%{efidir}/fwup%{efiarch}.efi
 
 %changelog
+* Tue Sep 27 2016 Peter Jones <pjones@redhat.com> - 8-2
+- Rebuild for efivar 30.
+
 * Fri Aug 19 2016 Peter Jones <pjones@redhat.com> - 8-1
 - Update to fwupdate 8
 - Fix some i686 build errors
