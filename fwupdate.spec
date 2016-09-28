@@ -18,6 +18,7 @@ BuildRequires: libsmbios-devel
 %endif
 ExclusiveArch:  x86_64 %{ix86} aarch64
 Source0:        https://github.com/rhinstaller/fwupdate/releases/download/%{name}-%{version}/%{name}-%{version}.tar.bz2
+Patch0001:	0001-Require-newer-efivar-for-bug-fixes.patch
 
 %ifarch x86_64
 %global efiarch x64

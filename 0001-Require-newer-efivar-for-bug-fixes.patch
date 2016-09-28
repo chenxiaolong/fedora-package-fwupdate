@@ -1,0 +1,36 @@
+From a9d953d5fde9ca04142095758a4bbde5891bb69b Mon Sep 17 00:00:00 2001
+From: Peter Jones <pjones@redhat.com>
+Date: Wed, 28 Sep 2016 11:23:26 -0400
+Subject: [PATCH] Require newer efivar for bug fixes
+
+Signed-off-by: Peter Jones <pjones@redhat.com>
+---
+ fwupdate.spec.in | 3 +--
+ linux/fwup.pc.in | 2 +-
+ 2 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/fwupdate.spec.in b/fwupdate.spec.in
+index ff6f55a..6dea638 100644
+--- a/fwupdate.spec.in
++++ b/fwupdate.spec.in
+@@ -1,5 +1,4 @@
+-%global efivar_version 28-1
+-%global efibootmgr_version 13-1
++%global efivar_version 30-1
+ 
+ Name:           fwupdate
+ Version:        @@VERSION@@
+diff --git a/linux/fwup.pc.in b/linux/fwup.pc.in
+index d0f1735..cfa307f 100644
+--- a/linux/fwup.pc.in
++++ b/linux/fwup.pc.in
+@@ -6,5 +6,5 @@ includedir=/usr/include
+ Name: fwup
+ Description: Library for deployment of UEFI firmware updates.
+ Version: @@VERSION@@
+-Requires: efivar >= 28
++Requires: efivar >= 30
+ Libs: -L${libdir} -lfwup
+-- 
+2.7.4
+
