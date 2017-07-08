@@ -1,3 +1,5 @@
-fwupdate-*.tar.*
-clog
-*.rpm
+/fwupdate-*.tar.*
+/clog
+/*.rpm
+/.build*.log
+/*/

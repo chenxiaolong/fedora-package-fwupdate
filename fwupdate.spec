@@ -18,7 +18,8 @@ BuildRequires: libsmbios-devel
 %endif
 ExclusiveArch:  x86_64 %{ix86} aarch64
 Source0:        https://github.com/rhinstaller/fwupdate/releases/download/%{name}-%{version}/%{name}-%{version}.tar.bz2
-Patch0001:	0001-Require-newer-efivar-for-bug-fixes.patch
+Patch0001:      0001-Require-newer-efivar-for-bug-fixes.patch
+Patch0002:      0002-Fix-a-definition-gcc-7-dislikes.patch
 
 %ifarch x86_64
 %global efiarch x64
@@ -135,6 +136,7 @@ rm -rf $RPM_BUILD_ROOT
 * Sat Jul 08 2017 Peter Jones <pjones@redhat.com> - 8-4
 - Rebuild for efivar-31-1.fc26
   Related: rhbz#1468841
+- Fix some gcc 7 quirks
 
 * Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 8-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
