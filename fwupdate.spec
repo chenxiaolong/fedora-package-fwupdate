@@ -3,7 +3,7 @@
 
 Name:           fwupdate
 Version:        8
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
 URL:            https://github.com/rhinstaller/fwupdate
@@ -132,6 +132,10 @@ rm -rf $RPM_BUILD_ROOT
 /boot/efi/EFI/%{efidir}/fwup%{efiarch}.efi
 
 %changelog
+* Sat Jul 08 2017 Peter Jones <pjones@redhat.com> - 8-4
+- Rebuild for efivar-31-1.fc26
+  Related: rhbz#1468841
+
 * Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 8-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 
