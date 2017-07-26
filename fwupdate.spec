@@ -3,7 +3,7 @@
 
 Name:           fwupdate
 Version:        8
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
 URL:            https://github.com/rhinstaller/fwupdate
@@ -18,8 +18,17 @@ BuildRequires: libsmbios-devel
 %endif
 ExclusiveArch:  x86_64 %{ix86} aarch64
 Source0:        https://github.com/rhinstaller/fwupdate/releases/download/%{name}-%{version}/%{name}-%{version}.tar.bz2
+Source1:        find-debuginfo-efi.sh
+Source2:        check-files-efi.sh
 Patch0001:      0001-Require-newer-efivar-for-bug-fixes.patch
 Patch0002:      0002-Fix-a-definition-gcc-7-dislikes.patch
+
+%global __os_install_post %{expand:\
+  %{?__debug_package:%{__debug_install_post}} \
+  %{SOURCE1} \
+  %{__arch_install_post} \
+  %{__os_install_post} \
+  %{nil}}%{nil}
 
 %ifarch x86_64
 %global efiarch x64
@@ -132,7 +141,24 @@ rm -rf $RPM_BUILD_ROOT
 %dir /boot/efi/EFI/%{efidir}/fw/
 /boot/efi/EFI/%{efidir}/fwup%{efiarch}.efi
 
+%package efi-debuginfo
+Summary: Debug information for package %{name}-efi
+Group: Development/Debug
+AutoReq: 0
+AutoProv: 1
+
+%description efi-debuginfo
+This package provides debug information for package %{name}-efi.
+Debug information is useful when developing applications that use this
+package or when debugging this package.
+
+%files efi-debuginfo -f debugfiles-efi.list
+%defattr(-,root,root)
+
 %changelog
+* Wed Jul 26 2017 Peter Jones <pjones@redhat.com> - 8-6
+- Try to make debuginfo generation work with rpm-4.13.0.1-38.fc27.x86_64
+
 * Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 8-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
 
