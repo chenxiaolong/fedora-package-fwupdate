@@ -3,7 +3,7 @@
 
 Name:           fwupdate
 Version:        8
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
 URL:            https://github.com/rhinstaller/fwupdate
@@ -156,6 +156,9 @@ package or when debugging this package.
 %defattr(-,root,root)
 
 %changelog
+* Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 8-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
+
 * Wed Jul 26 2017 Peter Jones <pjones@redhat.com> - 8-6
 - Try to make debuginfo generation work with rpm-4.13.0.1-38.fc27.x86_64
 
