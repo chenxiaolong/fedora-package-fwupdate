@@ -1,9 +1,10 @@
 %global efivar_version 30-1
 %global efibootmgr_version 13-1
+%undefine _debuginfo_subpackages
 
 Name:           fwupdate
-Version:        8
-Release:        7%{?dist}
+Version:        9
+Release:        0.1%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
 URL:            https://github.com/rhinstaller/fwupdate
@@ -13,15 +14,12 @@ BuildRequires:  gnu-efi gnu-efi-devel
 BuildRequires:  pesign
 BuildRequires:  elfutils popt-devel git gettext pkgconfig
 BuildRequires:  systemd
-%ifarch x86_64 %{ix86}
+%ifarch x86_64
 BuildRequires: libsmbios-devel
 %endif
-ExclusiveArch:  x86_64 %{ix86} aarch64
+ExclusiveArch:  x86_64 aarch64
 Source0:        https://github.com/rhinstaller/fwupdate/releases/download/%{name}-%{version}/%{name}-%{version}.tar.bz2
 Source1:        find-debuginfo-efi.sh
-Source2:        check-files-efi.sh
-Patch0001:      0001-Require-newer-efivar-for-bug-fixes.patch
-Patch0002:      0002-Fix-a-definition-gcc-7-dislikes.patch
 
 %global __os_install_post %{expand:\
   %{?__debug_package:%{__debug_install_post}} \
@@ -32,9 +30,7 @@ Patch0002:      0002-Fix-a-definition-gcc-7-dislikes.patch
 
 %ifarch x86_64
 %global efiarch x64
-%endif
-%ifarch %{ix86}
-%global efiarch ia32
+%global efialtarch ia32
 %endif
 %ifarch aarch64
 %global efiarch aa64
@@ -71,29 +67,74 @@ Requires: %{name}-libs = %{version}-%{release}
 %description efi
 UEFI binaries used by libfwup.
 
+%package efi-debuginfo
+Summary: debuginfo for UEFI binaries used by libfwup
+Requires: %{name}-efi = %{version}-%{release}
+AutoReq: 0
+AutoProv: 1
+
+%description efi-debuginfo
+debuginfo for UEFI binaries used by libfwup.
+
 %prep
 %setup -q -n %{name}-%{version}
 git init
 git config user.email "%{name}-owner@fedoraproject.org"
 git config user.name "Fedora Ninjas"
 git add .
+mkdir build-%{efiarch}
+%ifarch x86_64
+mkdir build-%{efialtarch}
+%endif
 git commit -a -q -m "%{version} baseline."
 git am %{patches} </dev/null
 git config --unset user.email
 git config --unset user.name
 
 %build
-make OPT_FLAGS="$RPM_OPT_FLAGS" libdir=%{_libdir} bindir=%{_bindir} \
+cd build-%{efiarch}
+make TOPDIR=.. -f ../Makefile OPT_FLAGS="$RPM_OPT_FLAGS" \
+     libdir=%{_libdir} bindir=%{_bindir} \
      EFIDIR=%{efidir} %{?_smp_mflags}
 mv -v efi/fwup%{efiarch}.efi efi/fwup%{efiarch}.unsigned.efi
 %pesign -s -i efi/fwup%{efiarch}.unsigned.efi -o efi/fwup%{efiarch}.efi
+cd ..
+
+%ifarch x86_64
+cd build-%{efialtarch}
+setarch linux32 -B make TOPDIR=.. -f ../Makefile ARCH=%{efialtarch} \
+                        OPT_FLAGS="$RPM_OPT_FLAGS" \
+                        libdir=%{_libdir} bindir=%{_bindir} \
+                        EFIDIR=%{efidir} %{?_smp_mflags}
+mv -v efi/fwup%{efialtarch}.efi efi/fwup%{efialtarch}.unsigned.efi
+%pesign -s -i efi/fwup%{efialtarch}.unsigned.efi -o efi/fwup%{efialtarch}.efi
+cd ..
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
-%make_install EFIDIR=%{efidir} libdir=%{_libdir} \
-       bindir=%{_bindir} mandir=%{_mandir} localedir=%{_datadir}/locale/ \
-       includedir=%{_includedir} libexecdir=%{_libexecdir} \
-       datadir=%{_datadir}
+cd build-%{efiarch}
+%make_install TOPDIR=.. -f ../Makefile \
+              EFIDIR=%{efidir} RPMARCH=%{_arch} RELEASE=%{RELEASE} \
+              libdir=%{_libdir} bindir=%{_bindir} mandir=%{_mandir} \
+              localedir=%{_datadir}/locale/ includedir=%{_includedir} \
+              libexecdir=%{_libexecdir} datadir=%{_datadir} \
+              sharedstatedir=%{_sharedstatedir}
+cd ..
+
+%ifarch x86_64
+cd build-%{efialtarch}
+setarch linux32 -B %make_install ARCH=%{efialtarch} TOPDIR=.. -f ../Makefile \
+                                 EFIDIR=%{efidir} RPMARCH=%{_arch} \
+                                 RELEASE=%{RELEASE} libdir=%{_libdir} \
+                                 bindir=%{_bindir} mandir=%{_mandir} \
+                                 localedir=%{_datadir}/locale/ \
+                                 includedir=%{_includedir} \
+                                 libexecdir=%{_libexecdir} \
+                                 datadir=%{_datadir} \
+                                 sharedstatedir=%{_sharedstatedir}
+cd ..
+%endif
 
 %post libs
 /sbin/ldconfig
@@ -129,8 +170,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.so.*
 %{_datadir}/locale/en/libfwup.po
 %{_unitdir}/fwupdate-cleanup.service
-%attr(0755,root,root) %dir %{_datadir}/fwupdate/
-%config(noreplace) %ghost %{_datadir}/fwupdate/done
+%attr(0755,root,root) %dir %{_sharedstatedir}/fwupdate/
+%config(noreplace) %ghost %{_sharedstatedir}/fwupdate/done
 %attr(0755,root,root) %dir %{_libexecdir}/fwupdate/
 %{_libexecdir}/fwupdate/cleanup
 
@@ -140,22 +181,18 @@ rm -rf $RPM_BUILD_ROOT
 %dir /boot/efi/EFI/%{efidir}/
 %dir /boot/efi/EFI/%{efidir}/fw/
 /boot/efi/EFI/%{efidir}/fwup%{efiarch}.efi
-
-%package efi-debuginfo
-Summary: Debug information for package %{name}-efi
-Group: Development/Debug
-AutoReq: 0
-AutoProv: 1
-
-%description efi-debuginfo
-This package provides debug information for package %{name}-efi.
-Debug information is useful when developing applications that use this
-package or when debugging this package.
+%ifarch x86_64
+/boot/efi/EFI/%{efidir}/fwup%{efialtarch}.efi
+%endif
 
 %files efi-debuginfo -f debugfiles-efi.list
 %defattr(-,root,root)
 
 %changelog
+* Tue Aug 22 2017 Peter Jones <pjones@redhat.com> - 9-0.1
+- Update to fwupdate 9
+- Support ia32
+
 * Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 8-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
@@ -260,3 +297,5 @@ package or when debugging this package.
 
 * Thu May 28 2015 Peter Jones <pjones@redhat.com> - 0.3-1
 - Here we go again.
+
+# vim:expandtab
