@@ -1,16 +1,18 @@
 %global efivar_version 30-1
 %global efibootmgr_version 13-1
+%global gnuefi_version 3.0.5-11
 %undefine _debuginfo_subpackages
 
 Name:           fwupdate
 Version:        9
-Release:        0.1%{?dist}
+Release:        0.2%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
 URL:            https://github.com/rhinstaller/fwupdate
 Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
 BuildRequires:  efivar-devel >= %{efivar_version}
-BuildRequires:  gnu-efi gnu-efi-devel
+BuildRequires:  gnu-efi >= %{gnu_efi_version}
+BuildRequires:  gnu-efi-devel >= %{gnu_efi_version}
 BuildRequires:  pesign
 BuildRequires:  elfutils popt-devel git gettext pkgconfig
 BuildRequires:  systemd
@@ -189,6 +191,9 @@ cd ..
 %defattr(-,root,root)
 
 %changelog
+* Thu Aug 24 2017 Peter Jones <pjones@redhat.com> - 9-0.2
+- Rebuild for aarch64 .reloc fix.
+
 * Tue Aug 22 2017 Peter Jones <pjones@redhat.com> - 9-0.1
 - Update to fwupdate 9
 - Support ia32
