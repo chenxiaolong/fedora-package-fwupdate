@@ -1,10 +1,10 @@
-%global efivar_version 30-1
+%global efivar_version 32-1
 %global efibootmgr_version 13-1
-%global gnuefi_version 3.0.5-11
+%global gnu_efi_version 3.0.5-11
 %undefine _debuginfo_subpackages
 
 Name:           fwupdate
-Version:        9
+Version:        10
 Release:        0.2%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
@@ -16,6 +16,7 @@ BuildRequires:  gnu-efi-devel >= %{gnu_efi_version}
 BuildRequires:  pesign
 BuildRequires:  elfutils popt-devel git gettext pkgconfig
 BuildRequires:  systemd
+BuildRequires:  libabigail
 %ifarch x86_64
 BuildRequires: libsmbios-devel
 %endif
@@ -92,6 +93,7 @@ git commit -a -q -m "%{version} baseline."
 git am %{patches} </dev/null
 git config --unset user.email
 git config --unset user.name
+git config fwupdate.efidir %{efidir}
 
 %build
 cd build-%{efiarch}
@@ -149,6 +151,11 @@ cd ..
 /sbin/ldconfig
 %systemd_postun_with_restart pesign.service
 
+%check
+%ifarch x86_64
+make abicheck
+%endif
+
 %files
 %defattr(-,root,root,-)
 %{!?_licensedir:%global license %%doc}
@@ -191,6 +198,11 @@ cd ..
 %defattr(-,root,root)
 
 %changelog
+* Tue Sep 12 2017 Peter Jones <pjones@redhat.com> - 10-0.2
+- Update for version 10
+- test release for ux capsule support; to enable UX capsules define
+  LIBFWUP_ADD_UX_CAPSULE=1 in your environment.
+
 * Thu Aug 24 2017 Peter Jones <pjones@redhat.com> - 9-0.2
 - Rebuild for aarch64 .reloc fix.
 
