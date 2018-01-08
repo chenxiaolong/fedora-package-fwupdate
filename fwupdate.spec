@@ -1,3 +1,6 @@
+%global commit 91351b8e93da608da31a812b876aa25b394ae665
+%global shortcommit %(c=%{commit}; echo ${c:0:7})
+
 %global efivar_version 32-1
 %global efibootmgr_version 13-1
 %global gnu_efi_version 3.0.5-11
@@ -5,7 +8,7 @@
 
 Name:           fwupdate
 Version:        10
-Release:        0.2%{?dist}
+Release:        0.3.git%{shortcommit}%{?dist}
 Summary:        Tools to manage UEFI firmware updates
 License:        GPLv2+
 URL:            https://github.com/rhinstaller/fwupdate
@@ -21,8 +24,9 @@ BuildRequires:  libabigail
 BuildRequires: libsmbios-devel
 %endif
 ExclusiveArch:  x86_64 aarch64
-Source0:        https://github.com/rhinstaller/fwupdate/releases/download/%{name}-%{version}/%{name}-%{version}.tar.bz2
+Source0:        https://github.com/rhboot/fwupdate/archive/%{commit}.tar.gz#/%{name}-%{commit}.tar.gz
 Source1:        find-debuginfo-efi.sh
+Patch0:         0001-Fix-fwupx64.efi-not-actually-staging-capsules-proper.patch
 
 %global __os_install_post %{expand:\
   %{?__debug_package:%{__debug_install_post}} \
@@ -80,7 +84,7 @@ AutoProv: 1
 debuginfo for UEFI binaries used by libfwup.
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q -n %{name}-%{commit}
 git init
 git config user.email "%{name}-owner@fedoraproject.org"
 git config user.name "Fedora Ninjas"
@@ -198,6 +202,10 @@ make abicheck
 %defattr(-,root,root)
 
 %changelog
+* Sun Jan 07 2018 Andrew Gunnerson <andrewgunnerson@gmail.com> - 10-0.3.git91351b8
+- Build from master
+- Add patch for: https://github.com/rhboot/fwupdate/pull/91
+
 * Tue Sep 12 2017 Peter Jones <pjones@redhat.com> - 10-0.2
 - Update for version 10
 - test release for ux capsule support; to enable UX capsules define

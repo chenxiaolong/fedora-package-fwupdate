@@ -1,0 +1,46 @@
+From 2008462a8d3caa6259c517c8db38db2943f84b69 Mon Sep 17 00:00:00 2001
+From: mario limonciello <mario.limonciello@dell.com>
+Date: Fri, 5 Jan 2018 18:23:55 -0500
+Subject: [PATCH] Fix fwupx64.efi not actually staging capsules properly. (#80)
+
+Bisecting master shows that the problem was introduced in 6f63cdd9.
+
+When the guid_cmp comparison was put in place it flipped the logic
+of one of the checks.
+
+git bisect start 'efi/'
+ bad: [5c2a8d03a9f4d11f3624dc201ff1d2207d19e995] efi: better debugging on our capsule tests.
+git bisect bad 5c2a8d03a9f4d11f3624dc201ff1d2207d19e995
+ good: [04daa639f2a8a125dea0dbe8bc150d9cd1d87550] Make SUBDIRS overrideable
+git bisect good 04daa639f2a8a125dea0dbe8bc150d9cd1d87550
+ good: [cd9ea4cbdc93da922ce9abc45c7de63fe252ecc8] efi: delete the boot path from the BootOrder list
+git bisect good cd9ea4cbdc93da922ce9abc45c7de63fe252ecc8
+ good: [515b0c0800beb48e928e367d254bd14f25da034a] Fix capsule sizes for our ux image capsules
+git bisect good 515b0c0800beb48e928e367d254bd14f25da034a
+ bad: [6f63cdd9eabf533fce909f40bf197c699b20d363] efi: Add guid_cmp() and remove manual comparisons.
+git bisect bad 6f63cdd9eabf533fce909f40bf197c699b20d363
+ good: [55ed685dec24c57129de6cf66e24388d05b5ed2a] Reorganize Make.version a bit so "bumpver" works better.
+git bisect good 55ed685dec24c57129de6cf66e24388d05b5ed2a
+ good: [75391bc4c3dcfc384ae9527d3fd82933280a2276] Adding capsule headers should add flags if it's /not/ a ux cap.
+git bisect good 75391bc4c3dcfc384ae9527d3fd82933280a2276
+ first bad commit: [6f63cdd9eabf533fce909f40bf197c699b20d363] efi: Add guid_cmp() and remove manual comparisons.
+---
+ efi/fwupdate.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/efi/fwupdate.c b/efi/fwupdate.c
+index 7d0d600..c447965 100644
+--- a/efi/fwupdate.c
++++ b/efi/fwupdate.c
+@@ -1037,7 +1037,7 @@ add_capsule(update_table *update, EFI_CAPSULE_HEADER **capsule_out,
+ 		Print(L"updates guid: %g\n", &update->info->guid);
+ 		Print(L"File guid: %g\n", fbuf);
+ 	}
+-	if ((guid_cmp(&update->info->guid, (efi_guid_t *)fbuf) ||
++	if ((guid_cmp(&update->info->guid, (efi_guid_t *)fbuf) == 0 ||
+ 	     is_fmp_capsule((efi_guid_t *)fbuf)) &&
+ 	    /*
+ 	     * We're ignoring things that are 40 bytes here, because that's
+-- 
+2.14.3
+
